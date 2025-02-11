@@ -28,10 +28,14 @@ db.run(`
     email TEXT UNIQUE NOT NULL,
     role TEXT NOT NULL
   )
-`);
-
+`, (err) => {
+  if (err) {
+    console.error("❌ Erreur lors de la création de la table :", err.message);
+  } else {
+    console.log("✅ Table 'users' créée avec succès !");
+  }
+});
 // --- Endpoints API CRUD ---
-
 // Récupérer tous les utilisateurs
 app.get('/api/users', (req, res) => {
   const sql = 'SELECT * FROM users';
@@ -43,7 +47,6 @@ app.get('/api/users', (req, res) => {
     res.json({ message: 'success', data: rows });
   });
 });
-
 // Récupérer un utilisateur par id
 app.get('/api/users/:id', (req, res) => {
   const sql = 'SELECT * FROM users WHERE id = ?';
@@ -59,7 +62,15 @@ app.get('/api/users/:id', (req, res) => {
 
 // Créer un nouvel utilisateur
 app.post('/api/users', (req, res) => {
+  console.log("📩 Données reçues dans le backend :", req.body); // Debug
+
   const { name, email, role } = req.body;
+
+  // Vérifier que les champs sont bien remplis
+  if (!name || !email || !role) {
+    return res.status(400).json({ error: "Tous les champs sont obligatoires" });
+  }
+
   const sql = 'INSERT INTO users (name, email, role) VALUES (?, ?, ?)';
   const params = [name, email, role];
 
@@ -69,12 +80,11 @@ app.post('/api/users', (req, res) => {
       return;
     }
     res.json({
-      message: 'Utilisateur ajouté avec succès !',
+      message: '✅ Utilisateur ajouté avec succès !',
       data: { id: this.lastID, name, email, role }
     });
   });
 });
-
 // Modifier un utilisateur existant
 app.put('/api/users/:id', (req, res) => {
   const { name, email, role } = req.body;

@@ -1,38 +1,119 @@
+/* Style général */
+body {
+  background-color: #f4f4f4;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Conteneur principal */
 .App {
   text-align: center;
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Titre */
+h1 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Champs du formulaire */
+form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 15px;
+}
+
+/* Inputs */
+input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: 0.3s;
+}
+
+/* Effet au focus */
+input:focus {
+  border-color: #6c63ff;
+  box-shadow: 0px 0px 5px rgba(108, 99, 255, 0.5);
+}
+
+/* Boutons */
+button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Bouton Ajouter */
+button[type="submit"] {
+  background: #6c63ff;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+button[type="submit"]:hover {
+  background: #554de8;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Bouton Annuler */
+button[type="button"] {
+  background: #ff6b6b;
+  color: white;
+}
+
+button[type="button"]:hover {
+  background: #e25555;
+}
+
+/* Liste des utilisateurs */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background: #f8f8f8;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Boutons Modifier & Supprimer */
+button:nth-child(2) {
+  background: #ffa500;
+  color: white;
+}
+
+button:nth-child(2):hover {
+  background: #e69500;
+}
+
+button:nth-child(3) {
+  background: #d9534f;
+  color: white;
+}
+
+button:nth-child(3):hover {
+  background: #c9302c;
 }
