@@ -1,128 +1,108 @@
-// backend/server.js
-
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { Pool } = require('pg');
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Middleware pour parser le JSON
+// Middleware JSON
 app.use(express.json());
 
-// Initialisation / connexion à la base SQLite
-const dbPath = path.resolve(__dirname, 'users.db');
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Erreur de connexion à la base SQLite :', err.message);
-  } else {
-    console.log('Connecté à la base SQLite.');
-  }
+// Connexion PostgreSQL (via Docker ou local)
+const pool = new Pool({
+  user: process.env.PGUSER || 'postgres',
+  host: process.env.PGHOST || 'localhost',
+  database: process.env.PGDATABASE || 'users_db',
+  password: process.env.PGPASSWORD || '1234',
+  port: process.env.PGPORT || 5432,
 });
 
-// Création de la table "users" si elle n'existe pas déjà
-db.run(`
+// Connexion à la base
+pool.connect()
+  .then(() => console.log("✅ Connecté à PostgreSQL (users_db)"))
+  .catch(err => console.error("❌ Erreur de connexion à PostgreSQL :", err));
+
+// Création de la table si elle n'existe pas
+pool.query(`
   CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     role TEXT NOT NULL
   )
-`, (err) => {
-  if (err) {
-    console.error("❌ Erreur lors de la création de la table :", err.message);
-  } else {
-    console.log("✅ Table 'users' créée avec succès !");
+`).then(() => console.log("✅ Table 'users' prête dans users_db !"))
+  .catch(err => console.error("❌ Erreur lors de la création de la table :", err));
+
+// Routes API
+app.get('/api/users', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM users');
+    res.json({ message: 'success', data: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
-// --- Endpoints API CRUD ---
-// Récupérer tous les utilisateurs
-app.get('/api/users', (req, res) => {
-  const sql = 'SELECT * FROM users';
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json({ message: 'success', data: rows });
-  });
-});
-// Récupérer un utilisateur par id
-app.get('/api/users/:id', (req, res) => {
-  const sql = 'SELECT * FROM users WHERE id = ?';
-  const params = [req.params.id];
-  db.get(sql, params, (err, row) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json({ message: 'success', data: row });
-  });
+
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [req.params.id]);
+    res.json({ message: 'success', data: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// Créer un nouvel utilisateur
-app.post('/api/users', (req, res) => {
-  console.log("📩 Données reçues dans le backend :", req.body); // Debug
-
+app.post('/api/users', async (req, res) => {
   const { name, email, role } = req.body;
-
-  // Vérifier que les champs sont bien remplis
   if (!name || !email || !role) {
     return res.status(400).json({ error: "Tous les champs sont obligatoires" });
   }
-
-  const sql = 'INSERT INTO users (name, email, role) VALUES (?, ?, ?)';
-  const params = [name, email, role];
-
-  db.run(sql, params, function(err) {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({
-      message: '✅ Utilisateur ajouté avec succès !',
-      data: { id: this.lastID, name, email, role }
-    });
-  });
+  try {
+    const result = await pool.query(
+      'INSERT INTO users (name, email, role) VALUES ($1, $2, $3) RETURNING *',
+      [name, email, role]
+    );
+    res.json({ message: '✅ Utilisateur ajouté avec succès !', data: result.rows[0] });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
-// Modifier un utilisateur existant
-app.put('/api/users/:id', (req, res) => {
+
+app.put('/api/users/:id', async (req, res) => {
   const { name, email, role } = req.body;
   const { id } = req.params;
-  const sql = 'UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?';
-  const params = [name, email, role, id];
-
-  db.run(sql, params, function(err) {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
+  try {
+    const result = await pool.query(
+      'UPDATE users SET name = $1, email = $2, role = $3 WHERE id = $4 RETURNING *',
+      [name, email, role, id]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
     }
-    res.json({
-      message: 'Utilisateur mis à jour avec succès !',
-      data: { id, name, email, role },
-      changes: this.changes
-    });
-  });
+    res.json({ message: '✅ Utilisateur mis à jour avec succès !', data: result.rows[0] });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-// Supprimer un utilisateur
-app.delete('/api/users/:id', (req, res) => {
+app.delete('/api/users/:id', async (req, res) => {
   const { id } = req.params;
-  const sql = 'DELETE FROM users WHERE id = ?';
-
-  db.run(sql, id, function(err) {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
+  try {
+    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING *', [id]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
     }
-    res.json({
-      message: 'Utilisateur supprimé avec succès !',
-      changes: this.changes
-    });
-  });
+    res.json({ message: '✅ Utilisateur supprimé avec succès !' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-// Démarrage du serveur
-app.listen(port, () => {
-  console.log(`Le serveur tourne sur le port ${port}`);
-});
+// ⚠️ Export de l'app pour les tests
+module.exports = app;
+
+// Démarrage du serveur uniquement si ce fichier est exécuté directement
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`🚀 Serveur lancé sur http://localhost:${port}`);
+  });
+}
