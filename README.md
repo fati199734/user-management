@@ -124,6 +124,16 @@ user-management/
 ├── .github/workflows/ci.yml
 └── README.md
 ```
+ ## Captures d'écran dans le Rapport
+Les captures d'écran utilisées dans le rapport sont liées à chaque section pertinente et sont accompagnées de titres pour mieux comprendre leur contexte. Vous trouverez chaque capture dans le document, associée aux différentes parties comme suit :
+
+- Tests automatisés : Capture des résultats des tests dans le terminal.
+
+- GitHub Actions - CI/CD : Capture de l'exécution des pipelines GitHub Actions.
+
+- Dockerisation : Capture des conteneurs Docker en cours d'exécution.
+
+- Ces captures ont été intégrées dans le rapport pour illustrer les différentes étapes du processus de développement et d'intégration.
 
 ---
 
