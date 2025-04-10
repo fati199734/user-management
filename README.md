@@ -128,7 +128,7 @@ user-management/
 ---
 
 ## Authors
-Fatima Zahrae Benharrouz
+Fatima Zahra Benharrouz
 
 ---
 
