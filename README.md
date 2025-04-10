@@ -124,6 +124,94 @@ user-management/
 ├── .github/workflows/ci.yml
 └── README.md
 ```
+## API Documentation
+
+### Endpoints
+
+1. **GET /api/users**
+   - Récupère la liste de tous les utilisateurs.
+   - **Réponse** : 
+     ```json
+     [
+       {
+         "id": 1,
+         "name": "John Doe",
+         "email": "john.doe@example.com",
+         "role": "admin"
+       },
+       {
+         "id": 2,
+         "name": "Jane Smith",
+         "email": "jane.smith@example.com",
+         "role": "user"
+       }
+     ]
+     ```
+
+2. **GET /api/users/:id**
+   - Récupère les informations d'un utilisateur spécifique par son ID.
+   - **Paramètre** : `id` (required)
+   - **Réponse** :
+     ```json
+     {
+       "id": 1,
+       "name": "John Doe",
+       "email": "john.doe@example.com",
+       "role": "admin"
+     }
+     ```
+
+3. **POST /api/users**
+   - Crée un nouvel utilisateur.
+   - **Corps de la requête** :
+     ```json
+     {
+       "name": "New User",
+       "email": "new.user@example.com",
+       "role": "user"
+     }
+     ```
+   - **Réponse** :
+     ```json
+     {
+       "id": 3,
+       "name": "New User",
+       "email": "new.user@example.com",
+       "role": "user"
+     }
+     ```
+
+4. **PUT /api/users/:id**
+   - Met à jour les informations d'un utilisateur.
+   - **Paramètre** : `id` (required)
+   - **Corps de la requête** :
+     ```json
+     {
+       "name": "Updated Name",
+       "email": "updated.email@example.com",
+       "role": "admin"
+     }
+     ```
+   - **Réponse** :
+     ```json
+     {
+       "id": 1,
+       "name": "Updated Name",
+       "email": "updated.email@example.com",
+       "role": "admin"
+     }
+     ```
+
+5. **DELETE /api/users/:id**
+   - Supprime un utilisateur par son ID.
+   - **Paramètre** : `id` (required)
+   - **Réponse** :
+     ```json
+     {
+       "message": "User deleted successfully"
+     }
+     ```
+
  ## Captures d'écran dans le Rapport
 Les captures d'écran utilisées dans le rapport sont liées à chaque section pertinente et sont accompagnées de titres pour mieux comprendre leur contexte. Vous trouverez chaque capture dans le document, associée aux différentes parties comme suit :
 
